@@ -32,7 +32,7 @@ $(function() {
                 var url = allFeeds[i].url;
 
                 expect(url).toBeDefined();
-                expect(url).toBeTruthy();
+                expect(url.length).toBeGreaterThan(0);
             }
 
         });
@@ -47,7 +47,7 @@ $(function() {
                 var name = allFeeds[i].name;
 
                 expect(name).toBeDefined();
-                expect(name).toBeTruthy();
+                expect(name.length).toBeGreaterThan(0);
             }
         });
     });
@@ -72,25 +72,19 @@ $(function() {
 
 
 
-        it('toggles when clicked', function(done) {
+        it('toggles when clicked', function() {
 
+            
+            //emulates clicking on the menu
+            $('.menu-icon-link').click();
+            //gets the style of the body
+            expect($('body').hasClass('menu-hidden')).toBe(false);
+            
+            $('.menu-icon-link').click();
+            expect($('body').hasClass('menu-hidden')).toBe(true);
 
-            $('.icon-list').one('click', function() {
-                //gets the style of the slide-menu
-                clickTwo();
-                expect($('body').hasClass('menu-hidden')).toBe(true);
+      
 
-            });
-
-            function clickTwo() {
-
-                $('.icon-list').click(function() {
-                    expect($('body').hasClass('menu-hidden')).toBe(false);
-                    done();
-
-                });
-
-            }
         });
     });
 
@@ -103,42 +97,56 @@ $(function() {
          * loadFeed() is asynchronous so this test requires
          * the use of Jasmine's beforeEach and asynchronous done() function.
          */
+        beforeEach(function(done){
+            var self = this;
+            loadFeed(0, function(){
+                //grabs the elements with the class 'entry', which
+                //load asynchronously, necessitating the use of 'done()'
+                self.entryDiv = document.getElementsByClassName('entry');
+                done();
+            });
+            
+        });
 
+        it('loadFeed has an entry', function(done) {
+            //asynchronously checks if the length of the entry divs array
+            //is greater than 0, meaning that they exist and have loaded
+            expect(this.entryDiv.length).toBeGreaterThan(0);
+            done();
 
-        it('loadFeed has an entry', function() {
-            var entryDiv = document.getElementsByClassName('entry');
-            var entryDivFirst = entryDiv[0];
-
-            expect(entryDivFirst).toBeDefined();
         });
     });
 
     describe('New Feed Selection', function() {
 
-        //loads the initial feed first
-        beforeEach(function() {
-            loadFeed(0);
+        
+        beforeEach(function(done) {
+            var self = this;
+            //loads the initial feed first
+            loadFeed(0, function(){
+                //gets the innerHTML of the initial feed
+                var firstFeedEntry = document.getElementsByClassName('entry');
+                self.firstHTML = firstFeedEntry[0].innerHTML;
+
+                //loads the second feed and gets the innerHTML, all
+                //asynchronously
+                loadFeed(1, function(){
+                    var secondFeedEntry = document.getElementsByClassName('entry');
+                    self.secondHTML = secondFeedEntry[0].innerHTML;
+                    done();
+                })
+            })
+
         });
 
         it('loadFeed loads properly', function(done) {
-            var self = this;
-
-            //gets the HTML for the first entry of the initially loaded feed
-            var entryDivFirst = document.getElementsByClassName('entry');
-            var entryHTML = entryDivFirst[0].innerHTML;
-
-            //loads a different feed, timesout and 
-            //gets the HTML for the new feed
-            //and compares the two;
-            //if they're different, then it evaluates to 'true';
-            //otherwise the test fails
-            loadFeed(1);
-            setTimeout(function() {
-                self.reloadedHTML = entryDivFirst[0].innerHTML;
-                self.correctLoad = entryHTML !== self.reloadedHTML;
-                expect(self.correctLoad).toBe(true);
-                done();
-            }, 3000);
+            //compares the first innerHTML to the second
+            var doesNotEqual = this.firstHTML !== this.secondHTML;
+            
+            //if they're equal, the test fails; if not, it passes
+            //also asynchronously
+            expect(doesNotEqual).toBe(true);
+            done();
         });
 
     });
