@@ -18,9 +18,13 @@ You can download Jasmine at:
 
 	[http://jasmine.github.io/];
 
-This particular app uses Jasmine 2.1. The app itself can be forked at: 
+This particular app uses Jasmine 2.1. The app itself can be downloaded or forked at: 
 
-	[]
+	[https://github.com/jackmasterson/jasmine];
+
+The app itself is saved as index.html, and the tests can be found in 
+	
+	[jasmine/spec/feedreader.js]
 
 To Use
 ------
